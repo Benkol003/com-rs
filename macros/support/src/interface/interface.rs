@@ -118,9 +118,14 @@ impl syn::parse::Parse for Interface {
             if path.is_ident("doc") {
                 docs.push(attr);
             } else if path.is_ident("uuid") {
-                let iid_str: ParenthsizedStr = syn::parse2(tokens.clone())?;
+                if let Ok(iid_str)  = syn::parse2::<ParenthsizedStr>(tokens.clone()) {
+                    iid = Some(IID::parse(&iid_str.lit)?);
+                }
 
-                iid = Some(IID::parse(&iid_str.lit)?);
+                else if let Ok(iid_expr) = syn::parse2::<ParenthsizedExpr>(tokens.clone()) {
+                    iid = Some(IID::Expr(iid_expr.expr));
+                }
+                
             } else {
                 return Err(syn::Error::new(
                     path.span(),
@@ -186,6 +191,19 @@ impl syn::parse::Parse for ParenthsizedStr {
             .map_err(|e| syn::Error::new(e.span(), "uuids must be string literals".to_string()))?;
 
         Ok(Self { lit })
+    }
+}
+
+struct ParenthsizedExpr {
+    expr: syn::Expr
+}
+
+impl syn::parse::Parse for ParenthsizedExpr {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let expr;
+        syn::parenthesized!(expr in input);
+        let expr = expr.parse()?;
+        Ok(Self { expr })
     }
 }
 

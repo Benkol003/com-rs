@@ -1,9 +1,12 @@
 use proc_macro2::{Ident, Span, TokenStream as HelperTokenStream};
 use quote::{format_ident, quote};
-use syn::{LitInt, LitStr};
+use syn::{Expr, LitInt, LitStr};
 
-pub struct IID {
-    parts: [String; 5],
+
+
+pub enum IID {
+    Parts([String; 5]),
+    Expr(Expr)
 }
 
 impl IID {
@@ -18,42 +21,53 @@ impl IID {
             ensure_length(delimited.next(), 4, 12, iid_string.span())?,
         ];
 
-        Ok(Self { parts })
+        Ok(Self::Parts(parts))
     }
 
     pub fn to_tokens(&self, interface_ident: &Ident) -> HelperTokenStream {
         let iid_ident = ident(interface_ident);
-        let data1 = hex_lit(&self.parts[0]);
-        let data2 = hex_lit(&self.parts[1]);
-        let data3 = hex_lit(&self.parts[2]);
-        let (data4_1, data4_2) = self.parts[3].split_at(2);
-        let data4_1 = hex_lit(data4_1);
-        let data4_2 = hex_lit(data4_2);
-        let (data4_3, rest) = self.parts[4].split_at(2);
-        let data4_3 = hex_lit(data4_3);
+        match &self {
+            IID::Parts(parts) => {
+                let data1 = hex_lit(&parts[0]);
+                let data2 = hex_lit(&parts[1]);
+                let data3 = hex_lit(&parts[2]);
+                let (data4_1, data4_2) = parts[3].split_at(2);
+                let data4_1 = hex_lit(data4_1);
+                let data4_2 = hex_lit(data4_2);
+                let (data4_3, rest) = parts[4].split_at(2);
+                let data4_3 = hex_lit(data4_3);
 
-        let (data4_4, rest) = rest.split_at(2);
-        let data4_4 = hex_lit(data4_4);
+                let (data4_4, rest) = rest.split_at(2);
+                let data4_4 = hex_lit(data4_4);
 
-        let (data4_5, rest) = rest.split_at(2);
-        let data4_5 = hex_lit(data4_5);
+                let (data4_5, rest) = rest.split_at(2);
+                let data4_5 = hex_lit(data4_5);
 
-        let (data4_6, rest) = rest.split_at(2);
-        let data4_6 = hex_lit(data4_6);
+                let (data4_6, rest) = rest.split_at(2);
+                let data4_6 = hex_lit(data4_6);
 
-        let (data4_7, data4_8) = rest.split_at(2);
-        let data4_7 = hex_lit(data4_7);
-        let data4_8 = hex_lit(data4_8);
-        quote!(
-            #[allow(missing_docs)]
-            #[doc(hidden)]
-            pub const #iid_ident: com::sys::IID = com::sys::IID {
-                data1: #data1,
-                data2: #data2,
-                data3: #data3,
-                data4: [#data4_1, #data4_2, #data4_3, #data4_4, #data4_5, #data4_6, #data4_7, #data4_8]
-            };
-        )
+                let (data4_7, data4_8) = rest.split_at(2);
+                let data4_7 = hex_lit(data4_7);
+                let data4_8 = hex_lit(data4_8);
+                quote!(
+                    #[allow(missing_docs)]
+                    #[doc(hidden)]
+                    pub const #iid_ident: com::sys::IID = com::sys::IID {
+                        data1: #data1,
+                        data2: #data2,
+                        data3: #data3,
+                        data4: [#data4_1, #data4_2, #data4_3, #data4_4, #data4_5, #data4_6, #data4_7, #data4_8]
+                    };
+                )
+            },
+            IID::Expr(expr) => {
+                quote!(
+                    #[allow(missing_docs)]
+                    #[doc(hidden)]
+                    pub const #iid_ident: com::sys::IID = #expr;
+                )
+            }
+        }
     }
 }
 
