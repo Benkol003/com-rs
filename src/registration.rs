@@ -193,10 +193,10 @@ macro_rules! inproc_dll_module {
 
             let class_id = unsafe { &*class_id };
             if class_id == &$class_id_one {
-                let instance = <$class_type_one as ::com::production::Class>::Factory::allocate();
+                let instance = <$class_type_one as ::com::Class>::Factory::allocate();
                 instance.QueryInterface(&*iid, result)
             } $(else if class_id == &$class_id {
-                let instance = <$class_type_one as ::com::production::Class>::Factory::allocate();
+                let instance = <$class_type_one as ::com::Class>::Factory::allocate();
                 instance.QueryInterface(&*iid, result)
             })* else {
                 ::com::sys::CLASS_E_CLASSNOTAVAILABLE
@@ -205,35 +205,35 @@ macro_rules! inproc_dll_module {
 
         #[no_mangle]
         extern "system" fn DllRegisterServer() -> ::com::sys::HRESULT {
-            ::com::production::registration::dll_register_server(&mut get_relevant_registry_keys())
+            ::com::registration::dll_register_server(&mut get_relevant_registry_keys())
         }
 
         #[no_mangle]
         extern "system" fn DllUnregisterServer() -> ::com::sys::HRESULT {
-            ::com::production::registration::dll_unregister_server(&mut get_relevant_registry_keys())
+            ::com::registration::dll_unregister_server(&mut get_relevant_registry_keys())
         }
 
-        fn get_relevant_registry_keys() -> Vec<::com::production::registration::RegistryKeyInfo> {
-            use ::com::production::registration::RegistryKeyInfo;
-            let file_path = unsafe { ::com::production::registration::get_dll_file_path(_HMODULE) };
+        fn get_relevant_registry_keys() -> Vec<::com::registration::RegistryKeyInfo> {
+            use ::com::registration::RegistryKeyInfo;
+            let file_path = unsafe { ::com::registration::get_dll_file_path(_HMODULE) };
             vec![
                 RegistryKeyInfo::new(
-                    &::com::production::registration::class_key_path($class_id_one),
+                    &::com::registration::class_key_path($class_id_one),
                     "",
                     stringify!($class_type_one),
                 ),
                 RegistryKeyInfo::new(
-                    &::com::production::registration::class_inproc_key_path($class_id_one),
+                    &::com::registration::class_inproc_key_path($class_id_one),
                     "",
                     &file_path,
                 ),
                 $(RegistryKeyInfo::new(
-                    &::com::production::registration::class_key_path($class_id),
+                    &::com::registration::class_key_path($class_id),
                     "",
                     stringify!($class_type),
                 ),
                 RegistryKeyInfo::new(
-                    &::com::production::registration::class_inproc_key_path($class_id),
+                    &::com::registration::class_inproc_key_path($class_id),
                     "",
                     &file_path,
                 )),*

@@ -33,7 +33,7 @@ impl Drop for FooServer {
     }
 }
 
-fn get_refcount<T: com::production::Class>(c: &com::production::ClassAllocation<T>) -> u32 {
+fn get_refcount<T: com::Class>(c: &com::ClassAllocation<T>) -> u32 {
     unsafe {
         // barbaric, but effective
         let _ = c.add_ref();

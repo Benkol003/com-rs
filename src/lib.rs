@@ -56,9 +56,18 @@ pub mod refcounting;
 pub mod runtime;
 pub mod sys;
 
-#[cfg(feature = "production")]
-/// Functionality for producing COM classes
-pub mod production;
+#[cfg(windows)]
+#[doc(hidden)]
+#[cfg(windows)]
+#[cfg(feature = "registration")]
+pub mod registration;
+
+#[cfg(feature = "class")]
+mod class;
+
+#[doc(inline)]
+#[cfg(feature = "class")]
+pub use class::{Class, ClassAllocation};
 
 #[doc(inline)]
 pub use abi_transferable::AbiTransferable;
@@ -110,7 +119,7 @@ pub use com_macros::interfaces;
 /// }
 /// # fn main() {}
 /// ```
-#[cfg(feature = "production")]
+#[cfg(feature = "class")]
 pub use com_macros::class;
 
 // this allows for the crate to refer to itself as `com` to keep macros consistent

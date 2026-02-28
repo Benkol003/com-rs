@@ -268,7 +268,7 @@ impl Class {
         let ref_count_ident = crate::utils::ref_count_ident();
 
         quote! {
-            unsafe impl com::production::Class for #name {
+            unsafe impl com::Class for #name {
                 type Factory = #factory;
 
                 unsafe fn dec_ref_count(&self) -> u32 {
@@ -619,7 +619,7 @@ impl Interface {
                 #[allow(non_snake_case)]
                 unsafe extern "system" fn #name(this: ::core::ptr::NonNull<::core::ptr::NonNull<#vtable_ident>>, #(#params),*) #ret {
                     let this = this.as_ptr().sub(#offset);
-                    let this = ::core::mem::ManuallyDrop::new(::com::production::ClassAllocation::from_raw(this as *mut _ as *mut #class_name));
+                    let this = ::core::mem::ManuallyDrop::new(::com::ClassAllocation::from_raw(this as *mut _ as *mut #class_name));
                     #(#translation)*
                     #class_name::#name(&this, #(#args),*)
                 }

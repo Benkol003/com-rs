@@ -36,14 +36,14 @@ pub fn generate(class: &Class) -> TokenStream {
         /// This allocates the class on the heap and pins it. This is because COM classes
         /// must have a stable location in memory. Once a COM class is instantiated somewhere
         /// it must stay there.
-        #vis fn allocate(#(#parameters),*) -> ::com::production::ClassAllocation<Self> {
+        #vis fn allocate(#(#parameters),*) -> ::com::ClassAllocation<Self> {
             let instance = #name {
                 #(#interface_fields)*
                 #ref_count_ident: ::core::sync::atomic::AtomicU32::new(1),
                 #(#user_fields),*
             };
             let instance = ::com::alloc::boxed::Box::pin(instance);
-            ::com::production::ClassAllocation::new(instance)
+            ::com::ClassAllocation::new(instance)
         }
     }
 }

@@ -17,8 +17,10 @@ com_macros = { version = "0.6", path = "macros" }
 
 [features]
 default = ["std"]
-# Production requires std because production::registration uses CString.
-production = ["std"]
+production = ["class","registration"]
+class = []
+#needs std as registration uses CString.
+registration = ["std"]
 std = []
 
 [[test]]

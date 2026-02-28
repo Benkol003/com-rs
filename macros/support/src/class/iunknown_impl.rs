@@ -66,7 +66,7 @@ impl IUnknownAbi {
 
         quote! {
             let munged = this.as_ptr().sub(#offset);
-            let munged = ::com::production::ClassAllocation::from_raw(munged as *mut _ as *mut #class_name);
+            let munged = ::com::ClassAllocation::from_raw(munged as *mut _ as *mut #class_name);
         }
     }
 
